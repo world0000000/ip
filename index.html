@@ -7,159 +7,82 @@
     <title>Geopolitische Intrigen im Balkan</title>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f0f0f0;
-            color: #333;
             margin: 0;
-            padding: 0;
-            background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #f0f0f0;
         }
 
-        header {
-            background: #222;
-            color: #fff;
-            padding: 20px 0;
-            text-align: center;
-            border-bottom: 5px solid #fff;
-            text-shadow: 1px 1px 2px #000;
+        #map {
+            width: 100%;
+            height: auto;
+            position: relative;
+            animation: fadeIn 2s ease;
         }
 
-        nav {
-            margin: 20px 0;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
-        nav ul {
-            list-style: none;
-            padding: 0;
+        .troop {
+            position: absolute;
+            background-color: red;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: moveTroop 5s forwards;
         }
 
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
+        @keyframes moveTroop {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(200px, 150px);
+            }
         }
 
-        nav ul li a {
-            color: #ffcc00;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-
-        nav ul li a:hover {
-            color: #fff;
-        }
-
-        section {
-            display: none;
-            background: #fff;
-            margin: 20px auto;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            max-width: 600px;
-        }
-
-        section.active {
-            display: block;
-        }
-
-        h2 {
-            color: #ffcc00;
-            text-shadow: 1px 1px 1px #000;
-        }
-
-        button {
-            background: #ffcc00;
-            color: #222;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #fff;
-        }
-
-        footer {
+        h1 {
             text-align: center;
             margin-top: 20px;
-            padding: 10px 0;
-            background: #222;
-            color: #fff;
-            position: relative;
-        }
-
-        footer p {
-            margin: 0;
-            text-shadow: 1px 1px 2px #000;
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>Geopolitische Intrigen im Balkan</h1>
-        <nav>
-            <ul>
-                <li><a href="#start">Start</a></li>
-                <li><a href="#operation">Die Operation</a></li>
-                <li><a href="#events">Ereignisse</a></li>
-                <li><a href="#impact">Auswirkungen</a></li>
-            </ul>
-        </nav>
-    </header>
+    <h1>Geopolitische Intrigen im Balkan</h1>
+    <svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+        <!-- Hier kannst du eine SVG-Karte hinzufügen -->
+        <rect width="800" height="400" fill="#87CEEB" />
+        <path d="M150,100 L250,100 L300,150 L250,200 L150,200 Z" fill="#8B4513" />
+        <text x="200" y="150" font-size="20" fill="white">Kosovo</text>
+        <path d="M400,100 L500,100 L550,150 L500,200 L400,200 Z" fill="#8B4513" />
+        <text x="450" y="150" font-size="20" fill="white">Serbien</text>
+        <path d="M650,100 L750,100 L800,150 L750,200 L650,200 Z" fill="#8B4513" />
+        <text x="700" y="150" font-size="20" fill="white">Albanien</text>
+    </svg>
 
-    <section id="start" class="active">
-        <h2>Einführung</h2>
-        <p>Willkommen zu einem spannenden geopolitischen Szenario im Balkan, wo Intrigen und strategische Manipulationen im Vordergrund stehen.</p>
-        <button onclick="nextSlide()">Nächster Schritt</button>
-    </section>
-
-    <section id="operation">
-        <h2>Die Operation</h2>
-        <p>Italienische Elite-Soldaten tarnen sich als ukrainische Soldaten, um eine geheime Operation im Kosovo durchzuführen. 
-        Diese Strategie wird genutzt, um die gegnerischen Kräfte zu destabilisieren und ihre Pläne zu vereiteln.</p>
-        <button onclick="nextSlide()">Nächster Schritt</button>
-    </section>
-
-    <section id="events">
-        <h2>Ereignisse</h2>
-        <p>Chronologische Auflistung der Ereignisse:</p>
-        <ul>
-            <li>1. Italien entsendet Elite-Soldaten zur Unterstützung der ukrainischen Operationen.</li>
-            <li>2. Tarnung als ukrainische Soldaten wird erfolgreich durchgeführt.</li>
-            <li>3. Agenten infiltrieren strategische Positionen im Kosovo.</li>
-            <li>4. Eskalation der Konflikte durch gezielte Manipulation.</li>
-            <li>5. Unerwartete Wendungen im geopolitischen Spiel.</li>
-        </ul>
-        <button onclick="nextSlide()">Nächster Schritt</button>
-    </section>
-
-    <section id="impact">
-        <h2>Auswirkungen</h2>
-        <p>Diskussion über die langfristigen Konsequenzen der Operation für die Region und die internationale Politik. 
-        Die Spannungen zwischen den beteiligten Ländern werden zunehmen und die geopolitische Landschaft könnte sich erheblich verändern.</p>
-        <button onclick="nextSlide()">Nächster Schritt</button>
-    </section>
-
-    <footer>
-        <p>© 2024 Geopolitische Intrigen im Balkan</p>
-    </footer>
+    <div class="troop" style="top: 50px; left: 50px;"></div>
+    <div class="troop" style="top: 80px; left: 150px;"></div>
+    <div class="troop" style="top: 100px; left: 300px;"></div>
 
     <script>
-        let currentSlide = 0;
-        const sections = document.querySelectorAll('section');
-
-        function nextSlide() {
-            if (currentSlide < sections.length - 1) {
-                sections[currentSlide].classList.remove('active');
-                currentSlide++;
-                sections[currentSlide].classList.add('active');
-            }
+        // Hier kannst du JavaScript hinzufügen, um interaktive Elemente hinzuzufügen
+        function animateTroops() {
+            const troops = document.querySelectorAll('.troop');
+            troops.forEach((troop, index) => {
+                troop.style.animationDelay = `${index * 1}s`;
+            });
         }
+
+        animateTroops();
     </script>
 </body>
 
