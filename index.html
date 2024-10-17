@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,17 +61,21 @@
 
         /* A4-Format mit Schatten und Rändern */
         #a4-area {
-            width: 210mm;
-            height: 297mm;
+            width: 200mm; /* Kleinere Breite */
+            height: 287mm; /* Kleinere Höhe */
             background-color: white;
             border: 2px solid black;
             position: relative;
-            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* Inhalte dürfen nicht über das A4-Bereich hinausragen */
         }
 
         /* Styling für Objekte – Rechtecke, Kreise, usw. */
-        .lager, .bunker, .munition, .panzer {
-            background-color: #777;
+        .lager,
+        .bunker,
+        .munition,
+        .panzer,
+        .wasser {
             color: white;
             display: flex;
             justify-content: center;
@@ -95,6 +100,11 @@
             position: absolute;
             border: 2px solid #f0f0f0;
             transition: background-color 0.3s;
+        }
+
+        /* Wasserobjekt */
+        .wasser {
+            background-color: rgba(0, 0, 255, 0.5);
         }
 
         /* Panzer mit eigenen Stilen */
@@ -126,6 +136,7 @@
         .pfeil {
             stroke-width: 3;
             stroke: orange;
+            fill: none;
         }
 
         /* Explosionen für Bomben und Geschütze */
@@ -134,6 +145,7 @@
                 transform: scale(0);
                 opacity: 1;
             }
+
             100% {
                 transform: scale(3);
                 opacity: 0;
@@ -162,7 +174,7 @@
             border-radius: 10px;
             padding: 20px;
             z-index: 1000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .popup h3 {
@@ -171,7 +183,9 @@
             color: #f2a900;
         }
 
-        .popup input[type="text"], .popup input[type="number"], .popup select {
+        .popup input[type="text"],
+        .popup input[type="number"],
+        .popup select {
             width: 100%;
             padding: 8px;
             margin: 10px 0;
@@ -222,7 +236,9 @@
         }
 
         @keyframes fadeIn {
-            100% { opacity: 1; }
+            100% {
+                opacity: 1;
+            }
         }
 
         .fade-out {
@@ -231,7 +247,9 @@
         }
 
         @keyframes fadeOut {
-            100% { opacity: 0; }
+            100% {
+                opacity: 0;
+            }
         }
 
         /* Cursor für Drag-Elemente */
@@ -241,6 +259,7 @@
 
     </style>
 </head>
+
 <body>
     <!-- Seitenleiste für alle Kriegsobjekte -->
     <div class="sidebar">
@@ -255,7 +274,7 @@
         <div class="tool" id="add-flugzeug">Flugzeug hinzufügen</div>
         <div class="tool" id="add-geschütz">Geschütz hinzufügen</div>
         <div class="tool" id="add-boot">Boot hinzufügen</div>
-        <div class="tool" id="add-geschütz-turm">Geschützturm hinzufügen</div>
+        <div class="tool" id="add-wasser">Wasser hinzufügen</div>
     </div>
 
     <!-- Hauptbereich mit dem A4-Format für das Platzieren der Objekte -->
@@ -278,166 +297,129 @@
         <label for="objekt-farbe">Farbe auswählen:</label>
         <input type="color" id="objekt-farbe" value="#ffffff">
         <label for="objekt-groesse">Größe:</label>
-        <input type="number" id="objekt-groesse" min="10" max="200" value="100">
+        <input type="number" id="objekt-groesse" min="10" max="200">
         <button id="save-settings">Speichern</button>
-        <button id="close-popup">Schließen</button>
     </div>
 
     <script>
-        let selectedObject = null; // Um das ausgewählte Objekt zu speichern
-        let animationRunning = false;
-        let animationSpeed = 1;
+        const a4Area = document.getElementById('a4-area');
+        const popupSettings = document.getElementById('popup-settings');
+        const objektFarbeInput = document.getElementById('objekt-farbe');
+        const objektGroesseInput = document.getElementById('objekt-groesse');
+        const saveSettingsButton = document.getElementById('save-settings');
+        let selectedElement = null;
 
-        // Funktion zum Erstellen eines Lagerobjekts
-        function createLager(x, y) {
-            const lager = document.createElement('div');
-            lager.className = 'lager drag-cursor';
-            lager.textContent = 'Lager';
-            lager.style.width = '100px';
-            lager.style.height = '50px';
-            lager.style.left = x + 'px';
-            lager.style.top = y + 'px';
-            lager.draggable = true; // Drag & Drop aktivieren
-            lager.ondragstart = dragStart;
-            lager.onclick = () => openPopup(lager);
-            document.getElementById('a4-area').appendChild(lager);
+        // Drag-and-Drop Funktionalität
+        function makeDraggable(element) {
+            element.addEventListener('mousedown', (e) => {
+                selectedElement = element;
+                element.classList.add('drag-cursor');
+                const offsetX = e.clientX - element.getBoundingClientRect().left;
+                const offsetY = e.clientY - element.getBoundingClientRect().top;
+
+                function onMouseMove(e) {
+                    element.style.left = `${e.clientX - offsetX}px`;
+                    element.style.top = `${e.clientY - offsetY}px`;
+                }
+
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    selectedElement.classList.remove('drag-cursor');
+                    selectedElement = null;
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
         }
 
-        // Funktion zum Erstellen eines Soldaten
-        function createSoldat(x, y) {
-            const soldat = document.createElement('div');
-            soldat.className = 'soldat drag-cursor';
-            soldat.textContent = 'Soldat';
-            soldat.style.left = x + 'px';
-            soldat.style.top = y + 'px';
-            soldat.draggable = true; // Drag & Drop aktivieren
-            soldat.ondragstart = dragStart;
-            soldat.onclick = () => openPopup(soldat);
-            document.getElementById('a4-area').appendChild(soldat);
-        }
-
-        // Funktion zum Erstellen eines Panzers
-        function createPanzer(x, y) {
-            const panzer = document.createElement('div');
-            panzer.className = 'panzer drag-cursor';
-            panzer.textContent = 'Panzer';
-            panzer.style.left = x + 'px';
-            panzer.style.top = y + 'px';
-            panzer.draggable = true; // Drag & Drop aktivieren
-            panzer.ondragstart = dragStart;
-            panzer.onclick = () => openPopup(panzer);
-            document.getElementById('a4-area').appendChild(panzer);
-        }
-
-        // Funktion zum Erstellen eines Baums
-        function createBaum(x, y) {
-            const baum = document.createElement('div');
-            baum.className = 'baum drag-cursor';
-            baum.style.left = x + 'px';
-            baum.style.top = y + 'px';
-            baum.draggable = true; // Drag & Drop aktivieren
-            baum.ondragstart = dragStart;
-            document.getElementById('a4-area').appendChild(baum);
-        }
-
-        // Funktion zum Erstellen eines Bunkers
-        function createBunker(x, y) {
+        // Objekte hinzufügen
+        document.getElementById('add-bunker').addEventListener('click', () => {
             const bunker = document.createElement('div');
-            bunker.className = 'bunker drag-cursor';
-            bunker.textContent = 'Bunker';
+            bunker.classList.add('bunker');
             bunker.style.width = '100px';
             bunker.style.height = '50px';
-            bunker.style.left = x + 'px';
-            bunker.style.top = y + 'px';
-            bunker.draggable = true; // Drag & Drop aktivieren
-            bunker.ondragstart = dragStart;
-            bunker.onclick = () => openPopup(bunker);
-            document.getElementById('a4-area').appendChild(bunker);
-        }
+            bunker.innerText = 'Bunker';
+            bunker.style.left = '10px';
+            bunker.style.top = '10px';
+            makeDraggable(bunker);
+            a4Area.appendChild(bunker);
+        });
 
-        // Funktion zum Erstellen von Explosionen
-        function createExplosion(x, y) {
-            const explosion = document.createElement('div');
-            explosion.className = 'explosion';
-            explosion.style.left = x + 'px';
-            explosion.style.top = y + 'px';
-            document.getElementById('a4-area').appendChild(explosion);
-            setTimeout(() => explosion.remove(), 1000); // Explosion nach 1s entfernen
-        }
+        document.getElementById('add-baum').addEventListener('click', () => {
+            const baum = document.createElement('div');
+            baum.classList.add('baum');
+            baum.style.left = '50px';
+            baum.style.top = '100px';
+            makeDraggable(baum);
+            a4Area.appendChild(baum);
+        });
 
-        // Drag & Drop-Funktionen
-        function dragStart(event) {
-            selectedObject = event.target;
-            event.dataTransfer.setData('text/plain', null); // Für Firefox
-        }
-
-        document.getElementById('a4-area').ondragover = (event) => {
-            event.preventDefault(); // Ermöglicht das Ablegen
-        };
-
-        document.getElementById('a4-area').ondrop = (event) => {
-            if (selectedObject) {
-                const rect = document.getElementById('a4-area').getBoundingClientRect();
-                const x = event.clientX - rect.left - (selectedObject.offsetWidth / 2);
-                const y = event.clientY - rect.top - (selectedObject.offsetHeight / 2);
-                selectedObject.style.left = x + 'px';
-                selectedObject.style.top = y + 'px';
-                selectedObject = null; // Zurücksetzen
+        document.getElementById('add-explosion').addEventListener('click', () => {
+            if (selectedElement) {
+                const explosion = document.createElement('div');
+                explosion.classList.add('explosion');
+                explosion.style.left = `${selectedElement.offsetLeft}px`;
+                explosion.style.top = `${selectedElement.offsetTop}px`;
+                a4Area.appendChild(explosion);
+                setTimeout(() => {
+                    explosion.remove();
+                }, 1000);
+            } else {
+                alert("Bitte wählen Sie ein Objekt aus, um die Explosion hinzuzufügen.");
             }
-        };
+        });
 
-        // Popup-Funktion
-        function openPopup(object) {
-            selectedObject = object;
-            document.getElementById('popup-settings').style.display = 'block';
-        }
+        // Wasser hinzufügen
+        document.getElementById('add-wasser').addEventListener('click', () => {
+            const wasser = document.createElement('div');
+            wasser.classList.add('wasser');
+            wasser.style.width = '80px';
+            wasser.style.height = '40px';
+            wasser.style.left = '150px';
+            wasser.style.top = '150px';
+            makeDraggable(wasser);
+            a4Area.appendChild(wasser);
+        });
 
-        // Schließen des Popups
-        document.getElementById('close-popup').onclick = () => {
-            document.getElementById('popup-settings').style.display = 'none';
-            selectedObject = null;
-        };
-
-        // Speichern der Einstellungen im Popup
-        document.getElementById('save-settings').onclick = () => {
-            if (selectedObject) {
-                const color = document.getElementById('objekt-farbe').value;
-                const size = document.getElementById('objekt-groesse').value;
-
-                selectedObject.style.backgroundColor = color;
-                selectedObject.style.width = size + 'px';
-                selectedObject.style.height = size + 'px'; // Größe anpassen
-                document.getElementById('popup-settings').style.display = 'none';
+        // Objekt-Einstellungen speichern
+        saveSettingsButton.addEventListener('click', () => {
+            if (selectedElement) {
+                selectedElement.style.backgroundColor = objektFarbeInput.value;
+                const size = objektGroesseInput.value;
+                selectedElement.style.width = `${size}px`;
+                selectedElement.style.height = `${size / 2}px`;
+                selectedElement = null; // Deselect element
+                popupSettings.style.display = 'none'; // Close the popup
             }
-        };
+        });
 
-        // Event Listener für die Buttons in der Sidebar
-        document.getElementById('add-lager').onclick = () => createLager(50, 50);
-        document.getElementById('add-soldat').onclick = () => createSoldat(100, 100);
-        document.getElementById('add-panzer').onclick = () => createPanzer(150, 150);
-        document.getElementById('add-baum').onclick = () => createBaum(200, 200);
-        document.getElementById('add-bunker').onclick = () => createBunker(250, 250);
-        document.getElementById('add-explosion').onclick = () => createExplosion(300, 300);
+        // Objekte auswählen und Popup anzeigen
+        a4Area.addEventListener('click', (e) => {
+            if (e.target !== a4Area) {
+                selectedElement = e.target;
+                objektFarbeInput.value = window.getComputedStyle(selectedElement).backgroundColor;
+                objektGroesseInput.value = parseInt(selectedElement.style.width);
+                popupSettings.style.display = 'block';
+            }
+        });
 
-        // Animation Steuerung
-        document.getElementById('start-stop-btn').onclick = () => {
-            animationRunning = !animationRunning;
-            document.getElementById('start-stop-btn').textContent = animationRunning ? 'Stop' : 'Start';
-        };
+        // Steuerelemente
+        document.getElementById('start-stop-btn').addEventListener('click', () => {
+            alert("Start/Stop Funktion ist derzeit nicht implementiert.");
+        });
 
-        document.getElementById('speed-up-btn').onclick = () => {
-            animationSpeed = animationSpeed < 5 ? animationSpeed + 1 : 1; // Geschwindigkeitswechsel
-            console.log("Aktuelle Geschwindigkeit:", animationSpeed);
-        };
+        document.getElementById('speed-up-btn').addEventListener('click', () => {
+            alert("Schneller Funktion ist derzeit nicht implementiert.");
+        });
 
-        document.getElementById('reset-btn').onclick = () => {
-            const a4Area = document.getElementById('a4-area');
+        document.getElementById('reset-btn').addEventListener('click', () => {
             while (a4Area.firstChild) {
                 a4Area.removeChild(a4Area.firstChild);
             }
-            animationRunning = false;
-            document.getElementById('start-stop-btn').textContent = 'Start';
-        };
+        });
     </script>
 </body>
+
 </html>
