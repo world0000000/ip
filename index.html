@@ -1,89 +1,395 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geopolitische Intrigen im Balkan</title>
+    <title>WWII Animations-Editor</title>
     <style>
+        /* WWII Design – Ästhetik und Look */
         body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #3b3b3b;
             margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            background-color: #f0f0f0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
         }
 
-        #map {
-            width: 100%;
-            height: auto;
+        /* Seitenleiste für Objekte */
+        .sidebar {
+            width: 300px;
+            background-color: #2c2c2c;
+            color: #f0f0f0;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            color: #f2a900;
+            font-size: 22px;
+        }
+
+        .tool {
+            background-color: #4b4b4b;
+            color: white;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .tool:hover {
+            background-color: #6b6b6b;
+        }
+
+        /* Hauptbereich mit A4-Format */
+        .main {
+            flex: 1;
             position: relative;
-            animation: fadeIn 2s ease;
+            background-color: #ccc;
+            margin: 10px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* A4-Format mit Schatten und Rändern */
+        #a4-area {
+            width: 210mm;
+            height: 297mm;
+            background-color: white;
+            border: 2px solid black;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        /* Styling für Objekte – Rechtecke, Kreise, usw. */
+        .lager, .bunker, .munition {
+            width: 100px;
+            height: 50px;
+            background-color: #777;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+
+        /* Soldaten als Kreise */
+        .soldat {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #888;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: absolute;
+        }
+
+        /* Panzer mit eigenen Stilen */
+        .panzer {
+            width: 120px;
+            height: 60px;
+            background-color: #555;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        /* Bäume und andere Naturressourcen */
+        .baum {
+            width: 30px;
+            height: 60px;
+            background-color: #228B22;
+            border: 2px solid #006400;
+            position: absolute;
+            border-radius: 5px;
+        }
+
+        /* Pfeil für Bewegungen */
+        .pfeil {
+            stroke-width: 3;
+            stroke: orange;
+        }
+
+        /* Explosionen für Bomben und Geschütze */
+        @keyframes explosion {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .explosion {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            animation: explosion 1s forwards;
+        }
+
+        /* Popup Fenster Design für Objekt-Eigenschaften */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background-color: #333;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .popup h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #f2a900;
+        }
+
+        .popup input[type="text"], .popup input[type="number"], .popup select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .popup button {
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: #f2a900;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .popup button:hover {
+            background-color: #d18e00;
+        }
+
+        /* Animations Steuerung */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f2a900;
+            color: black;
+        }
+
+        button:hover {
+            background-color: #d18e00;
+        }
+
+        /* Übergänge und sanfte Effekte */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            100% { opacity: 1; }
         }
 
-        .troop {
-            position: absolute;
-            background-color: red;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            animation: moveTroop 5s forwards;
+        .fade-out {
+            opacity: 1;
+            animation: fadeOut 1s forwards;
         }
 
-        @keyframes moveTroop {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            100% {
-                transform: translate(200px, 150px);
-            }
+        @keyframes fadeOut {
+            100% { opacity: 0; }
         }
 
-        h1 {
-            text-align: center;
-            margin-top: 20px;
+        /* Cursor für Drag-Elemente */
+        .drag-cursor {
+            cursor: move;
         }
+
     </style>
 </head>
-
 <body>
-    <h1>Geopolitische Intrigen im Balkan</h1>
-    <svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
-        <!-- Hier kannst du eine SVG-Karte hinzufügen -->
-        <rect width="800" height="400" fill="#87CEEB" />
-        <path d="M150,100 L250,100 L300,150 L250,200 L150,200 Z" fill="#8B4513" />
-        <text x="200" y="150" font-size="20" fill="white">Kosovo</text>
-        <path d="M400,100 L500,100 L550,150 L500,200 L400,200 Z" fill="#8B4513" />
-        <text x="450" y="150" font-size="20" fill="white">Serbien</text>
-        <path d="M650,100 L750,100 L800,150 L750,200 L650,200 Z" fill="#8B4513" />
-        <text x="700" y="150" font-size="20" fill="white">Albanien</text>
-    </svg>
+    <!-- Seitenleiste für alle Kriegsobjekte -->
+    <div class="sidebar">
+        <h2>Kriegsobjekte</h2>
+        <div class="tool" id="add-lager">Lager hinzufügen</div>
+        <div class="tool" id="add-soldat">Soldat hinzufügen</div>
+        <div class="tool" id="add-panzer">Panzer hinzufügen</div>
+        <div class="tool" id="add-baum">Baum hinzufügen</div>
+        <div class="tool" id="add-bunker">Bunker hinzufügen</div>
+        <div class="tool" id="add-munition">Munition hinzufügen</div>
+        <div class="tool" id="add-explosion">Explosion hinzufügen</div>
+    </div>
 
-    <div class="troop" style="top: 50px; left: 50px;"></div>
-    <div class="troop" style="top: 80px; left: 150px;"></div>
-    <div class="troop" style="top: 100px; left: 300px;"></div>
+    <!-- Hauptbereich mit dem A4-Format für das Platzieren der Objekte -->
+    <div class="main">
+        <div id="a4-area">
+            <!-- Objekte und Animationen werden hier hinzugefügt -->
+        </div>
+    </div>
+
+    <!-- Animation-Steuerung -->
+    <div class="controls">
+        <button id="start-stop-btn">Start</button>
+        <button id="speed-up-btn">Schneller</button>
+        <button id="reset-btn">Zurücksetzen</button>
+    </div>
+
+    <!-- Popup für die Einstellungen von Objekten -->
+    <div class="popup" id="popup-settings">
+        <h3>Objekt-Einstellungen</h3>
+        <label for="objekt-farbe">Farbe auswählen:</label>
+        <input type="color" id="objekt-farbe" value="#ffffff">
+        <label for="objekt-groesse">Größe:</label>
+        <input type="number" id="objekt-groesse" min="10" max="200" value="100">
+        <label for="bewegungspfeil">Pfeilfarbe:</label>
+        <select id="bewegungspfeil">
+            <option value="orange">Orange</option>
+            <option value="blau">Blau</option>
+            <option value="rot">Rot</option>
+        </select>
+        <button id="save-settings-btn">Speichern</button>
+    </div>
 
     <script>
-        // Hier kannst du JavaScript hinzufügen, um interaktive Elemente hinzuzufügen
-        function animateTroops() {
-            const troops = document.querySelectorAll('.troop');
-            troops.forEach((troop, index) => {
-                troop.style.animationDelay = `${index * 1}s`;
+        // Objekt-Tracking
+        let selectedObject = null;
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        // Liste aller Kriegsobjekte
+        const kriegsObjekte = [];
+
+        // A4 Bereich
+        const a4Area = document.getElementById('a4-area');
+
+        // Drag & Drop Funktionalität für alle Objekte
+        function makeDraggable(element) {
+            element.addEventListener('mousedown', function (e) {
+                isDragging = true;
+                selectedObject = element;
+                offsetX = e.offsetX;
+                offsetY = e.offsetY;
+                element.classList.add('drag-cursor');
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (isDragging && selectedObject) {
+                    selectedObject.style.left = (e.pageX - offsetX) + 'px';
+                    selectedObject.style.top = (e.pageY - offsetY) + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', function () {
+                isDragging = false;
+                if (selectedObject) {
+                    selectedObject.classList.remove('drag-cursor');
+                    selectedObject = null;
+                }
             });
         }
 
-        animateTroops();
+        // Objekte zum A4-Bereich hinzufügen
+        function addObject(type) {
+            let obj = document.createElement('div');
+            if (type === 'lager') {
+                obj.classList.add('lager');
+                obj.innerHTML = 'Lager';
+            } else if (type === 'soldat') {
+                obj.classList.add('soldat');
+                obj.innerHTML = '<img src="soldat.jpg" alt="Soldat" width="50" height="50">';
+            } else if (type === 'panzer') {
+                obj.classList.add('panzer');
+                obj.innerHTML = 'Panzer';
+            } else if (type === 'baum') {
+                obj.classList.add('baum');
+            } else if (type === 'bunker') {
+                obj.classList.add('bunker');
+                obj.innerHTML = 'Bunker';
+            } else if (type === 'munition') {
+                obj.classList.add('munition');
+                obj.innerHTML = 'Munition';
+            } else if (type === 'explosion') {
+                obj.classList.add('explosion');
+            }
+
+            obj.style.left = '50px';
+            obj.style.top = '50px';
+            obj.style.position = 'absolute';
+            a4Area.appendChild(obj);
+
+            makeDraggable(obj);
+
+            // Popup öffnen beim Doppelklick für Einstellungen
+            obj.addEventListener('dblclick', function () {
+                selectedObject = obj;
+                document.getElementById('popup-settings').style.display = 'block';
+            });
+        }
+
+        // Event Listener für Hinzufügen von Objekten
+        document.getElementById('add-lager').addEventListener('click', () => addObject('lager'));
+        document.getElementById('add-soldat').addEventListener('click', () => addObject('soldat'));
+        document.getElementById('add-panzer').addEventListener('click', () => addObject('panzer'));
+        document.getElementById('add-baum').addEventListener('click', () => addObject('baum'));
+        document.getElementById('add-bunker').addEventListener('click', () => addObject('bunker'));
+        document.getElementById('add-munition').addEventListener('click', () => addObject('munition'));
+        document.getElementById('add-explosion').addEventListener('click', () => addObject('explosion'));
+
+        // Popup schließt, wenn man speichert
+        document.getElementById('save-settings-btn').addEventListener('click', function () {
+            let farbe = document.getElementById('objekt-farbe').value;
+            selectedObject.style.backgroundColor = farbe;
+
+            let groesse = document.getElementById('objekt-groesse').value;
+            selectedObject.style.width = groesse + 'px';
+            selectedObject.style.height = groesse + 'px';
+
+            document.getElementById('popup-settings').style.display = 'none';
+        });
+
+        // Animation Steuerung – Platzhalter Funktionen
+        document.getElementById('start-stop-btn').addEventListener('click', function () {
+            // Start/Stop der Animation
+        });
+
+        document.getElementById('speed-up-btn').addEventListener('click', function () {
+            // Animation beschleunigen
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', function () {
+            // Layout zurücksetzen
+            a4Area.innerHTML = '';
+        });
     </script>
 </body>
-
 </html>
