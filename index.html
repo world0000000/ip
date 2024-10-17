@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WWII Animations-Editor</title>
     <style>
-        /* WWII Design – Ästhetik und Look */
+        /* Design für den Zweiten Weltkrieg */
         body {
             font-family: 'Courier New', Courier, monospace;
             background-color: #3b3b3b;
@@ -16,7 +16,7 @@
             height: 100vh;
         }
 
-        /* Seitenleiste für Objekte */
+        /* Sidebar für die Werkzeuge */
         .sidebar {
             width: 300px;
             background-color: #2c2c2c;
@@ -47,7 +47,7 @@
             background-color: #6b6b6b;
         }
 
-        /* Hauptbereich mit A4-Format */
+        /* Hauptbereich mit dem A4-Format */
         .main {
             flex: 1;
             position: relative;
@@ -59,32 +59,21 @@
             align-items: center;
         }
 
-        /* A4-Format mit Schatten und Rändern */
+        /* A4 Blatt angepasst, kleiner für die Ansicht */
         #a4-area {
-            width: 200mm; /* Kleinere Breite */
-            height: 287mm; /* Kleinere Höhe */
+            width: 180mm; /* Verkleinerte Breite */
+            height: 250mm; /* Verkleinerte Höhe */
             background-color: white;
             border: 2px solid black;
             position: relative;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            overflow: hidden; /* Inhalte dürfen nicht über das A4-Bereich hinausragen */
+            overflow: hidden;
         }
 
-        /* Styling für Objekte – Rechtecke, Kreise, usw. */
-        .lager,
-        .bunker,
-        .munition,
-        .panzer,
-        .wasser {
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Styles für die Objekte wie Bunker, Soldaten, etc. */
+        .object {
             position: absolute;
-            font-size: 12px;
-            border-radius: 3px;
-            border: 1px solid #f0f0f0;
-            transition: background-color 0.3s;
+            cursor: move;
         }
 
         /* Soldaten als Kreise */
@@ -99,47 +88,9 @@
             overflow: hidden;
             position: absolute;
             border: 2px solid #f0f0f0;
-            transition: background-color 0.3s;
         }
 
-        /* Wasserobjekt */
-        .wasser {
-            background-color: rgba(0, 0, 255, 0.5);
-        }
-
-        /* Panzer mit eigenen Stilen */
-        .panzer {
-            width: 120px;
-            height: 60px;
-            background-color: #555;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 1px solid #f0f0f0;
-        }
-
-        /* Bäume und andere Naturressourcen */
-        .baum {
-            width: 30px;
-            height: 60px;
-            background-color: #228B22;
-            border: 2px solid #006400;
-            position: absolute;
-            border-radius: 5px;
-        }
-
-        /* Pfeil für Bewegungen */
-        .pfeil {
-            stroke-width: 3;
-            stroke: orange;
-            fill: none;
-        }
-
-        /* Explosionen für Bomben und Geschütze */
+        /* Explosionseffekt */
         @keyframes explosion {
             0% {
                 transform: scale(0);
@@ -161,52 +112,7 @@
             animation: explosion 1s forwards;
         }
 
-        /* Popup Fenster Design für Objekt-Eigenschaften */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background-color: #333;
-            color: white;
-            border-radius: 10px;
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .popup h3 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #f2a900;
-        }
-
-        .popup input[type="text"],
-        .popup input[type="number"],
-        .popup select {
-            width: 100%;
-            padding: 8px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-        }
-
-        .popup button {
-            padding: 10px 20px;
-            font-size: 14px;
-            background-color: #f2a900;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .popup button:hover {
-            background-color: #d18e00;
-        }
-
-        /* Animations Steuerung */
+        /* Steuerung und Knöpfe */
         .controls {
             position: absolute;
             bottom: 20px;
@@ -229,39 +135,16 @@
             background-color: #d18e00;
         }
 
-        /* Übergänge und sanfte Effekte */
-        .fade-in {
-            opacity: 0;
-            animation: fadeIn 1s forwards;
-        }
-
-        @keyframes fadeIn {
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .fade-out {
-            opacity: 1;
-            animation: fadeOut 1s forwards;
-        }
-
-        @keyframes fadeOut {
-            100% {
-                opacity: 0;
-            }
-        }
-
-        /* Cursor für Drag-Elemente */
-        .drag-cursor {
-            cursor: move;
+        /* Wasser-Element */
+        .wasser {
+            background-color: rgba(0, 0, 255, 0.5);
         }
 
     </style>
 </head>
 
 <body>
-    <!-- Seitenleiste für alle Kriegsobjekte -->
+    <!-- Sidebar mit Werkzeugen -->
     <div class="sidebar">
         <h2>Kriegsobjekte</h2>
         <div class="tool" id="add-lager">Lager hinzufügen</div>
@@ -277,43 +160,37 @@
         <div class="tool" id="add-wasser">Wasser hinzufügen</div>
     </div>
 
-    <!-- Hauptbereich mit dem A4-Format für das Platzieren der Objekte -->
+    <!-- Hauptbereich mit dem A4 Blatt -->
     <div class="main">
-        <div id="a4-area">
-            <!-- Objekte und Animationen werden hier hinzugefügt -->
-        </div>
+        <div id="a4-area"></div>
     </div>
 
-    <!-- Animation-Steuerung -->
+    <!-- Steuerung für Start/Stop und Animation -->
     <div class="controls">
         <button id="start-stop-btn">Start</button>
         <button id="speed-up-btn">Schneller</button>
         <button id="reset-btn">Zurücksetzen</button>
     </div>
 
-    <!-- Popup für die Einstellungen von Objekten -->
-    <div class="popup" id="popup-settings">
-        <h3>Objekt-Einstellungen</h3>
-        <label for="objekt-farbe">Farbe auswählen:</label>
-        <input type="color" id="objekt-farbe" value="#ffffff">
-        <label for="objekt-groesse">Größe:</label>
-        <input type="number" id="objekt-groesse" min="10" max="200">
-        <button id="save-settings">Speichern</button>
-    </div>
-
     <script>
         const a4Area = document.getElementById('a4-area');
-        const popupSettings = document.getElementById('popup-settings');
-        const objektFarbeInput = document.getElementById('objekt-farbe');
-        const objektGroesseInput = document.getElementById('objekt-groesse');
-        const saveSettingsButton = document.getElementById('save-settings');
-        let selectedElement = null;
 
-        // Drag-and-Drop Funktionalität
+        // Funktion zum Erstellen von drag-and-drop-fähigen Objekten
+        function createObject(className, width, height, innerText = '') {
+            const obj = document.createElement('div');
+            obj.classList.add('object', className);
+            obj.style.width = width + 'px';
+            obj.style.height = height + 'px';
+            obj.innerText = innerText;
+            obj.style.left = '10px';
+            obj.style.top = '10px';
+            makeDraggable(obj);
+            a4Area.appendChild(obj);
+        }
+
+        // Drag-and-drop-Funktionalität
         function makeDraggable(element) {
             element.addEventListener('mousedown', (e) => {
-                selectedElement = element;
-                element.classList.add('drag-cursor');
                 const offsetX = e.clientX - element.getBoundingClientRect().left;
                 const offsetY = e.clientY - element.getBoundingClientRect().top;
 
@@ -325,8 +202,6 @@
                 function onMouseUp() {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
-                    selectedElement.classList.remove('drag-cursor');
-                    selectedElement = null;
                 }
 
                 document.addEventListener('mousemove', onMouseMove);
@@ -335,90 +210,42 @@
         }
 
         // Objekte hinzufügen
-        document.getElementById('add-bunker').addEventListener('click', () => {
-            const bunker = document.createElement('div');
-            bunker.classList.add('bunker');
-            bunker.style.width = '100px';
-            bunker.style.height = '50px';
-            bunker.innerText = 'Bunker';
-            bunker.style.left = '10px';
-            bunker.style.top = '10px';
-            makeDraggable(bunker);
-            a4Area.appendChild(bunker);
+        document.getElementById('add-lager').addEventListener('click', () => {
+            createObject('lager', 100, 50, 'Lager');
+        });
+
+        document.getElementById('add-soldat').addEventListener('click', () => {
+            createObject('soldat', 50, 50);
+        });
+
+        document.getElementById('add-panzer').addEventListener('click', () => {
+            createObject('panzer', 120, 60, 'Panzer');
         });
 
         document.getElementById('add-baum').addEventListener('click', () => {
-            const baum = document.createElement('div');
-            baum.classList.add('baum');
-            baum.style.left = '50px';
-            baum.style.top = '100px';
-            makeDraggable(baum);
-            a4Area.appendChild(baum);
+            createObject('baum', 30, 60);
+        });
+
+        document.getElementById('add-wasser').addEventListener('click', () => {
+            createObject('wasser', 80, 40);
         });
 
         document.getElementById('add-explosion').addEventListener('click', () => {
-            if (selectedElement) {
-                const explosion = document.createElement('div');
-                explosion.classList.add('explosion');
-                explosion.style.left = `${selectedElement.offsetLeft}px`;
-                explosion.style.top = `${selectedElement.offsetTop}px`;
-                a4Area.appendChild(explosion);
-                setTimeout(() => {
-                    explosion.remove();
-                }, 1000);
-            } else {
-                alert("Bitte wählen Sie ein Objekt aus, um die Explosion hinzuzufügen.");
-            }
+            const explosion = document.createElement('div');
+            explosion.classList.add('explosion');
+            explosion.style.left = '100px';
+            explosion.style.top = '100px';
+            a4Area.appendChild(explosion);
+            setTimeout(() => {
+                explosion.remove();
+            }, 1000);
         });
 
-        // Wasser hinzufügen
-        document.getElementById('add-wasser').addEventListener('click', () => {
-            const wasser = document.createElement('div');
-            wasser.classList.add('wasser');
-            wasser.style.width = '80px';
-            wasser.style.height = '40px';
-            wasser.style.left = '150px';
-            wasser.style.top = '150px';
-            makeDraggable(wasser);
-            a4Area.appendChild(wasser);
-        });
-
-        // Objekt-Einstellungen speichern
-        saveSettingsButton.addEventListener('click', () => {
-            if (selectedElement) {
-                selectedElement.style.backgroundColor = objektFarbeInput.value;
-                const size = objektGroesseInput.value;
-                selectedElement.style.width = `${size}px`;
-                selectedElement.style.height = `${size / 2}px`;
-                selectedElement = null; // Deselect element
-                popupSettings.style.display = 'none'; // Close the popup
-            }
-        });
-
-        // Objekte auswählen und Popup anzeigen
-        a4Area.addEventListener('click', (e) => {
-            if (e.target !== a4Area) {
-                selectedElement = e.target;
-                objektFarbeInput.value = window.getComputedStyle(selectedElement).backgroundColor;
-                objektGroesseInput.value = parseInt(selectedElement.style.width);
-                popupSettings.style.display = 'block';
-            }
-        });
-
-        // Steuerelemente
-        document.getElementById('start-stop-btn').addEventListener('click', () => {
-            alert("Start/Stop Funktion ist derzeit nicht implementiert.");
-        });
-
-        document.getElementById('speed-up-btn').addEventListener('click', () => {
-            alert("Schneller Funktion ist derzeit nicht implementiert.");
-        });
-
+        // Reset Funktion
         document.getElementById('reset-btn').addEventListener('click', () => {
-            while (a4Area.firstChild) {
-                a4Area.removeChild(a4Area.firstChild);
-            }
+            a4Area.innerHTML = '';
         });
+
     </script>
 </body>
 
